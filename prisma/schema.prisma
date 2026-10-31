@@ -1,15 +1,123 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// --------------------
+// ENUMS
+// --------------------
+
+enum Role {
+  PROFESSOR
+  STUDENT
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+}
+
+// --------------------
+// USER
+// --------------------
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(STUDENT)
+
+  courses      Course[]
+  sessions     Session[]
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// --------------------
+// SESSION
+// --------------------
+
+model Session {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// --------------------
+// COURSE
+// --------------------
+
+model Course {
+  id             String       @id @default(uuid())
+  title          String
+  description    String       @db.Text
+  coverImageUrl  String?
+  status         CourseStatus @default(DRAFT)
+
+  professorId    String
+  professor      User         @relation(fields: [professorId], references: [id], onDelete: Restrict)
+
+  lessons        Lesson[]
+  liveSessions   LiveSession[]
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([professorId])
+  @@index([status])
+}
+
+// --------------------
+// LESSON
+// --------------------
+
+model Lesson {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text
+  videoUrl    String
+  order       Int
+
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([courseId, order])
+  @@index([courseId])
+}
+
+// --------------------
+// LIVE SESSION
+// --------------------
+
+model LiveSession {
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text
+  startsAt    DateTime
+  meetingUrl  String
+
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([courseId, startsAt])
 }
