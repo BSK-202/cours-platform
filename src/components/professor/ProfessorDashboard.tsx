@@ -29,17 +29,21 @@ import {
 import {
     getCourses,
     getLessons,
+    getLiveSessions,
     updateCourse,
     deleteCourse,
     deleteLesson,
+    deleteLiveSession,
     type Course,
     type Lesson,
+    type LiveSession,
 } from "@/lib/api/courses";
 
 import CourseModal from "@/components/professor/CourseModal";
 import LessonModal from "@/components/professor/LessonModal";
 import Toast, { type ToastType } from "@/components/ui/Toast";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import LiveSessionModal from "@/components/professor/LiveSessionModal";
 
 interface ToastState {
     type: ToastType;
@@ -87,6 +91,33 @@ export default function ProfessorDashboard() {
     const [processingLessonId, setProcessingLessonId] = useState<string | null>(
         null,
     );
+
+    // SESSIONS LIVE
+
+    const [liveSessionCourse, setLiveSessionCourse] = useState<Course | null>(null);
+    const [editingLiveSession, setEditingLiveSession] =
+        useState<LiveSession | null>(null);
+
+    const [liveSessionsByCourse, setLiveSessionsByCourse] = useState<
+        Record<string, LiveSession[]>
+    >({});
+
+    const [expandedLiveCourseId, setExpandedLiveCourseId] = useState<
+        string | null
+    >(null);
+
+    const [loadingLiveSessionsFor, setLoadingLiveSessionsFor] = useState<
+        string | null
+    >(null);
+
+    const [liveSessionToDelete, setLiveSessionToDelete] =
+        useState<LiveSession | null>(null);
+
+    const [liveSessionDeleteCourseId, setLiveSessionDeleteCourseId] =
+        useState<string | null>(null);
+
+    const [processingLiveSessionId, setProcessingLiveSessionId] =
+        useState<string | null>(null);
 
     function showToast(type: ToastType, message: string) {
         setToast({ type, message });
@@ -242,6 +273,12 @@ export default function ProfessorDashboard() {
             );
 
             setLessonsByCourse((current) => {
+                const updated = { ...current };
+                delete updated[course.id];
+                return updated;
+            });
+            
+            setLiveSessionsByCourse((current) => {
                 const updated = { ...current };
                 delete updated[course.id];
                 return updated;
@@ -434,6 +471,179 @@ export default function ProfessorDashboard() {
             setProcessingLessonId(null);
         }
     }
+
+
+    // SESSIONS LIVE
+
+    async function toggleLiveSessions(course: Course) {
+        if (
+            loadingLiveSessionsFor ||
+            processingCourseId ||
+            processingLessonId ||
+            processingLiveSessionId
+        ) {
+            return;
+        }
+
+        if (expandedLiveCourseId === course.id) {
+            setExpandedLiveCourseId(null);
+            return;
+        }
+
+        setExpandedLiveCourseId(course.id);
+
+        if (liveSessionsByCourse[course.id]) return;
+
+        setLoadingLiveSessionsFor(course.id);
+
+        try {
+            const sessions = await getLiveSessions(course.id);
+
+            setLiveSessionsByCourse((current) => ({
+                ...current,
+                [course.id]: [...sessions].sort(
+                    (a, b) =>
+                        new Date(a.startsAt).getTime() -
+                        new Date(b.startsAt).getTime(),
+                ),
+            }));
+        } catch (err) {
+            setExpandedLiveCourseId(null);
+
+            showToast(
+                "error",
+                err instanceof Error
+                    ? err.message
+                    : "Impossible de charger les sessions Live.",
+            );
+        } finally {
+            setLoadingLiveSessionsFor(null);
+        }
+    }
+
+    function openCreateLiveSession(course: Course) {
+        setLiveSessionCourse(course);
+        setEditingLiveSession(null);
+        closeToast();
+    }
+
+    function openEditLiveSession(
+        course: Course,
+        session: LiveSession,
+    ) {
+        setLiveSessionCourse(course);
+        setEditingLiveSession(session);
+        closeToast();
+    }
+
+    function closeLiveSessionModal() {
+        setLiveSessionCourse(null);
+        setEditingLiveSession(null);
+    }
+
+    function handleLiveSessionSaved(
+        savedSession: LiveSession,
+        mode: "create" | "edit",
+    ) {
+        if (!liveSessionCourse) return;
+
+        const courseId = liveSessionCourse.id;
+
+        setLiveSessionsByCourse((current) => {
+            const existing = current[courseId] ?? [];
+
+            const updated =
+                mode === "create"
+                    ? [...existing, savedSession]
+                    : existing.map((session) =>
+                        session.id === savedSession.id
+                            ? savedSession
+                            : session,
+                    );
+
+            return {
+                ...current,
+                [courseId]: updated.sort(
+                    (a, b) =>
+                        new Date(a.startsAt).getTime() -
+                        new Date(b.startsAt).getTime(),
+                ),
+            };
+        });
+
+        showToast(
+            "success",
+            mode === "create"
+                ? "La session Live a été programmée avec succès."
+                : "La session Live a été modifiée avec succès.",
+        );
+
+        closeLiveSessionModal();
+    }
+
+    function openDeleteLiveSessionDialog(
+        courseId: string,
+        session: LiveSession,
+    ) {
+        setLiveSessionDeleteCourseId(courseId);
+        setLiveSessionToDelete(session);
+        closeToast();
+    }
+
+    function closeDeleteLiveSessionDialog() {
+        if (processingLiveSessionId) return;
+
+        setLiveSessionToDelete(null);
+        setLiveSessionDeleteCourseId(null);
+    }
+
+    async function handleDeleteLiveSession() {
+        if (
+            !liveSessionToDelete ||
+            !liveSessionDeleteCourseId ||
+            processingLiveSessionId
+        ) {
+            return;
+        }
+
+        const session = liveSessionToDelete;
+        const courseId = liveSessionDeleteCourseId;
+
+        setProcessingLiveSessionId(session.id);
+        closeToast();
+
+        try {
+            await deleteLiveSession(session.id);
+
+            setLiveSessionsByCourse((current) => ({
+                ...current,
+                [courseId]: (current[courseId] ?? []).filter(
+                    (item) => item.id !== session.id,
+                ),
+            }));
+
+            setLiveSessionToDelete(null);
+            setLiveSessionDeleteCourseId(null);
+
+            showToast(
+                "success",
+                "La session Live a été supprimée avec succès.",
+            );
+        } catch (err) {
+            setLiveSessionToDelete(null);
+            setLiveSessionDeleteCourseId(null);
+
+            showToast(
+                "error",
+                err instanceof Error
+                    ? err.message
+                    : "Impossible de supprimer cette session Live.",
+            );
+        } finally {
+            setProcessingLiveSessionId(null);
+        }
+    }
+
 
     // AUTHENTIFICATION
 
@@ -652,6 +862,9 @@ export default function ProfessorDashboard() {
                                 const isExpanded = expandedCourseId === course.id;
                                 const courseLessons = lessonsByCourse[course.id] ?? [];
 
+                                const isLiveExpanded = expandedLiveCourseId === course.id;
+                                const courseLiveSessions = liveSessionsByCourse[course.id] ?? [];
+
                                 return (
                                     <div key={course.id}>
                                         <div className="flex flex-col justify-between gap-4 p-5 lg:flex-row lg:items-center">
@@ -663,8 +876,8 @@ export default function ProfessorDashboard() {
 
                                                     <span
                                                         className={`rounded-full px-2.5 py-1 text-xs font-medium ${course.status === "PUBLISHED"
-                                                                ? "bg-emerald-50 text-emerald-700"
-                                                                : "bg-amber-50 text-amber-700"
+                                                            ? "bg-emerald-50 text-emerald-700"
+                                                            : "bg-amber-50 text-amber-700"
                                                             }`}
                                                     >
                                                         {course.status === "PUBLISHED"
@@ -702,6 +915,29 @@ export default function ProfessorDashboard() {
                                                     {isExpanded ? "Masquer les leçons" : "Gérer les leçons"}
                                                 </button>
 
+
+                                                <button
+                                                    onClick={() => toggleLiveSessions(course)}
+                                                    disabled={
+                                                        loadingLiveSessionsFor === course.id ||
+                                                        Boolean(processingCourseId) ||
+                                                        Boolean(processingLessonId) ||
+                                                        Boolean(processingLiveSessionId)
+                                                    }
+                                                    className="flex items-center gap-2 rounded-lg border border-violet-200 px-3 py-2 text-sm font-semibold text-violet-700 transition hover:bg-violet-50 disabled:opacity-50"
+                                                >
+                                                    {loadingLiveSessionsFor === course.id ? (
+                                                        <Loader2 size={15} className="animate-spin" />
+                                                    ) : (
+                                                        <Video size={15} />
+                                                    )}
+
+                                                    {expandedLiveCourseId === course.id
+                                                        ? "Masquer les sessions Live"
+                                                        : "Gérer les sessions Live"}
+                                                </button>
+
+
                                                 <button
                                                     onClick={() => openEditModal(course)}
                                                     disabled={isProcessing}
@@ -714,8 +950,8 @@ export default function ProfessorDashboard() {
                                                     onClick={() => handleTogglePublication(course)}
                                                     disabled={isProcessing || Boolean(processingLessonId)}
                                                     className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition disabled:opacity-50 ${course.status === "PUBLISHED"
-                                                            ? "border border-amber-200 text-amber-700 hover:bg-amber-50"
-                                                            : "bg-emerald-600 text-white hover:bg-emerald-700"
+                                                        ? "border border-amber-200 text-amber-700 hover:bg-amber-50"
+                                                        : "bg-emerald-600 text-white hover:bg-emerald-700"
                                                         }`}
                                                 >
                                                     {isProcessing ? (
@@ -849,6 +1085,112 @@ export default function ProfessorDashboard() {
                                                 )}
                                             </div>
                                         )}
+
+
+                                        {isLiveExpanded && (
+                                            <div className="border-t border-violet-100 bg-violet-50/40 px-5 py-5">
+                                                <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                                                    <div>
+                                                        <h4 className="font-semibold text-slate-800">
+                                                            Sessions Live
+                                                        </h4>
+                                                        <p className="mt-1 text-xs text-slate-500">
+                                                            Planifiez et gérez les visioconférences de cette formation.
+                                                        </p>
+                                                    </div>
+
+                                                    <button
+                                                        onClick={() => openCreateLiveSession(course)}
+                                                        disabled={Boolean(processingLiveSessionId)}
+                                                        className="flex items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-700 disabled:opacity-50"
+                                                    >
+                                                        <Plus size={16} />
+                                                        Programmer une session
+                                                    </button>
+                                                </div>
+
+                                                {loadingLiveSessionsFor === course.id ? (
+                                                    <div className="flex items-center justify-center gap-2 py-8 text-sm text-slate-500">
+                                                        <Loader2 size={18} className="animate-spin text-violet-600" />
+                                                        Chargement des sessions Live...
+                                                    </div>
+                                                ) : courseLiveSessions.length === 0 ? (
+                                                    <div className="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center">
+                                                        <Video size={28} className="mx-auto mb-3 text-slate-400" />
+                                                        <p className="text-sm font-medium text-slate-700">
+                                                            Aucune session Live programmée
+                                                        </p>
+                                                        <p className="mt-1 text-xs text-slate-500">
+                                                            Programmez votre première session pour permettre aux étudiants de rejoindre une visioconférence.
+                                                        </p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="space-y-3">
+                                                        {courseLiveSessions.map((session) => (
+                                                            <div
+                                                                key={session.id}
+                                                                className="flex flex-col justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center"
+                                                            >
+                                                                <div className="min-w-0">
+                                                                    <h5 className="font-semibold text-slate-800">
+                                                                        {session.title}
+                                                                    </h5>
+
+                                                                    {session.description && (
+                                                                        <p className="mt-1 line-clamp-2 text-sm text-slate-500">
+                                                                            {session.description}
+                                                                        </p>
+                                                                    )}
+
+                                                                    <p className="mt-2 text-xs font-medium text-violet-700">
+                                                                        {new Date(session.startsAt).toLocaleString(
+                                                                            "fr-FR",
+                                                                            {
+                                                                                dateStyle: "long",
+                                                                                timeStyle: "short",
+                                                                            },
+                                                                        )}
+                                                                    </p>
+
+                                                                    <a
+                                                                        href={session.meetingUrl}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-800"
+                                                                    >
+                                                                        <Video size={13} />
+                                                                        Ouvrir le lien de visioconférence
+                                                                    </a>
+                                                                </div>
+
+                                                                <div className="flex shrink-0 items-center gap-2">
+                                                                    <button
+                                                                        onClick={() => openEditLiveSession(course, session)}
+                                                                        disabled={Boolean(processingLiveSessionId)}
+                                                                        className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700 disabled:opacity-50"
+                                                                        title="Modifier la session"
+                                                                    >
+                                                                        <Pencil size={16} />
+                                                                    </button>
+
+                                                                    <button
+                                                                        onClick={() =>
+                                                                            openDeleteLiveSessionDialog(course.id, session)
+                                                                        }
+                                                                        disabled={Boolean(processingLiveSessionId)}
+                                                                        className="rounded-lg border border-red-200 p-2 text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+                                                                        title="Supprimer la session"
+                                                                    >
+                                                                        <Trash2 size={16} />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
                                     </div>
                                 );
                             })}
@@ -884,6 +1226,21 @@ export default function ProfessorDashboard() {
                 />
             )}
 
+
+            {liveSessionCourse && (
+                <LiveSessionModal
+                    key={
+                        editingLiveSession?.id ??
+                        `new-live-session-${liveSessionCourse.id}`
+                    }
+                    course={liveSessionCourse}
+                    session={editingLiveSession}
+                    onSuccess={handleLiveSessionSaved}
+                    onClose={closeLiveSessionModal}
+                />
+            )}
+
+
             {courseToDelete && (
                 <ConfirmDialog
                     title="Confirmer la suppression"
@@ -909,6 +1266,21 @@ export default function ProfessorDashboard() {
                     onCancel={closeDeleteLessonDialog}
                 />
             )}
+
+
+            {liveSessionToDelete && (
+                <ConfirmDialog
+                    title="Supprimer cette session Live ?"
+                    message="Cette action est définitive. La session sera supprimée de cette formation."
+                    itemName={liveSessionToDelete.title}
+                    confirmLabel="Supprimer la session"
+                    cancelLabel="Annuler"
+                    loading={processingLiveSessionId === liveSessionToDelete.id}
+                    onConfirm={handleDeleteLiveSession}
+                    onCancel={closeDeleteLiveSessionDialog}
+                />
+            )}
+
         </div>
     );
 }
