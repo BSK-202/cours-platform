@@ -102,6 +102,10 @@ export async function getCourses(): Promise<Course[]> {
   return apiRequest<Course[]>("/api/courses");
 }
 
+export async function getCourseById(courseId: string): Promise<Course> {
+  return apiRequest<Course>(`/api/courses/${courseId}`);
+}
+
 export async function createCourse(input: CourseInput): Promise<Course> {
   return apiRequest<Course>("/api/courses", {
     method: "POST",

@@ -77,6 +77,7 @@ export async function GET() {
     const courses = user
       ? await getCourses(user.id, user.role)
       : await getPublishedCourses();
+      
 
     return NextResponse.json(
       {

@@ -73,6 +73,7 @@ export async function getCourses(
 
 
 
+
 export async function getPublishedCourses() {
   const courses = await prisma.course.findMany({
     where: {
@@ -125,16 +126,9 @@ export async function getCourseById(
       professorId: true,
       createdAt: true,
       updatedAt: true,
-      lessons: {
-        orderBy: {
-          order: "asc",
-        },
+      _count: {
         select: {
-          id: true,
-          title: true,
-          description: true,
-          videoUrl: true,
-          order: true,
+          lessons: true,
         },
       },
     },
