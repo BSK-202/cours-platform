@@ -41,6 +41,8 @@ export const updateCourseSchema = z
       .max(5000, "La description ne doit pas dépasser 5000 caractères.")
       .optional(),
 
+    status: z.enum(["DRAFT", "PUBLISHED"]).optional(),
+
     coverImageUrl: z
       .string()
       .trim()
@@ -48,10 +50,5 @@ export const updateCourseSchema = z
       .optional()
       .or(z.literal("")),
   })
-  .strict()
-  .refine(
-    (data) => Object.keys(data).length > 0,
-    "Au moins un champ doit être fourni."
-  );
-
+  
 export type UpdateCourseInput = z.infer<typeof updateCourseSchema>;

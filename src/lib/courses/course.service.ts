@@ -57,6 +57,41 @@ export async function getCourses(
       professorId: true,
       createdAt: true,
       updatedAt: true,
+      _count: {
+        select: {
+          lessons: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return courses;
+}
+
+
+
+export async function getPublishedCourses() {
+  const courses = await prisma.course.findMany({
+    where: {
+      status: "PUBLISHED",
+    },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      coverImageUrl: true,
+      status: true,
+      professorId: true,
+      createdAt: true,
+      updatedAt: true,
+      _count: {
+        select: {
+          lessons: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -113,14 +148,12 @@ export async function updateCourse(
   professorId: string,
   input: unknown
 ) {
-  // 1. Valider les données reçues
   const validation = updateCourseSchema.safeParse(input);
 
   if (!validation.success) {
     throw new Error("Données du cours invalides.");
   }
 
-  // 2. Vérifier que le cours appartient au professeur
   const existingCourse = await prisma.course.findFirst({
     where: {
       id: courseId,
@@ -128,6 +161,11 @@ export async function updateCourse(
     },
     select: {
       id: true,
+      _count: {
+        select: {
+          lessons: true,
+        },
+      },
     },
   });
 
@@ -135,8 +173,16 @@ export async function updateCourse(
     return null;
   }
 
-  // 3. Préparer les données modifiables
   const { coverImageUrl, ...data } = validation.data;
+
+  if (
+    data.status === "PUBLISHED" &&
+    existingCourse._count.lessons === 0
+  ) {
+    throw new Error(
+      "Impossible de publier une formation sans au moins une leçon."
+    );
+  }
 
   const updatedCourse = await prisma.course.update({
     where: {

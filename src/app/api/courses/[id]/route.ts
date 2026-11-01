@@ -110,7 +110,10 @@ export async function PATCH(
 
     if (
       error instanceof Error &&
-      error.message === "Données du cours invalides."
+      [
+        "Données du cours invalides.",
+        "Impossible de publier une formation sans au moins une leçon.",
+      ].includes(error.message)
     ) {
       return NextResponse.json(
         { success: false, message: error.message },

@@ -10,22 +10,41 @@ import {
   ArrowRight,
   Home,
   BookOpen,
-  Users,
   Info,
   LogIn,
 } from "lucide-react";
 
 const navigation = [
   { label: "Accueil", href: "/", icon: Home },
-  { label: "Nos cours", href: "#courses", icon: BookOpen },
-  { label: "Enseignants", href: "#teachers", icon: Users },
+  { label: "Formations", href: "#courses", icon: BookOpen },
   { label: "À propos", href: "#about", icon: Info },
 ];
+
+function Brand({ mobile = false }: { mobile?: boolean }) {
+  return (
+    <Link
+      href="/"
+      className={`flex items-center gap-2 ${mobile ? "" : "shrink-0"}`}
+    >
+      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white">
+        <GraduationCap size={23} />
+      </span>
+
+      <span className="flex flex-col">
+        <span className="text-base font-bold tracking-tight text-slate-900 sm:text-lg">
+          Ikrame <span className="text-indigo-600">BASKANE</span>
+        </span>
+        <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+          Formations en ligne
+        </span>
+      </span>
+    </Link>
+  );
+}
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Bloquer le scroll de la page lorsque le menu est ouvert.
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
 
@@ -37,18 +56,12 @@ export default function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-18 sm:px-5 lg:px-8">
+        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-20 sm:px-6 lg:px-8">
 
-          {/* Desktop logo */}
-          <Link href="/" className="hidden items-center gap-2 md:flex">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white">
-              <GraduationCap size={24} />
-            </span>
-
-            <span className="text-xl font-bold tracking-tight text-slate-900">
-              Skill<span className="text-indigo-600">Bridge</span>
-            </span>
-          </Link>
+          {/* Desktop brand */}
+          <div className="hidden md:flex">
+            <Brand />
+          </div>
 
           {/* Desktop navigation */}
           <div className="hidden items-center gap-8 md:flex">
@@ -76,15 +89,15 @@ export default function Navbar() {
               href="/register"
               className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
             >
-              Commencer gratuitement
+              S'inscrire
               <ArrowRight size={16} />
             </Link>
           </div>
 
-          {/* Mobile header: menu left, logo right */}
+          {/* Mobile header */}
           <div className="flex w-full items-center justify-between md:hidden">
 
-            {/* Hamburger on the LEFT */}
+            {/* Hamburger left */}
             <button
               type="button"
               onClick={() => setIsOpen(true)}
@@ -96,16 +109,8 @@ export default function Navbar() {
               <Menu size={25} />
             </button>
 
-            {/* Logo on the RIGHT */}
-            <Link href="/" className="flex items-center gap-2">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white">
-                <GraduationCap size={24} />
-              </span>
-
-              <span className="text-xl font-bold tracking-tight text-slate-900">
-                Skill<span className="text-indigo-600">Bridge</span>
-              </span>
-            </Link>
+            {/* Brand right */}
+            <Brand mobile />
           </div>
         </nav>
       </header>
@@ -121,30 +126,21 @@ export default function Navbar() {
         }`}
       />
 
-      {/* Mobile side drawer: opens from LEFT to RIGHT */}
+      {/* Mobile drawer */}
       <aside
         id="mobile-drawer"
         aria-label="Navigation mobile"
         aria-hidden={!isOpen}
-        className={`fixed inset-y-0 left-0 z-[60] flex w-[82%] max-w-80 flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${
+        inert={!isOpen}
+        className={`fixed inset-y-0 left-0 z-[60] flex w-[85%] max-w-80 flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Drawer header */}
         <div className="flex h-16 items-center justify-between border-b border-slate-100 px-5">
-          <Link
-            href="/"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-2"
-          >
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
-              <GraduationCap size={22} />
-            </span>
-
-            <span className="text-lg font-bold text-slate-900">
-              Skill<span className="text-indigo-600">Bridge</span>
-            </span>
-          </Link>
+          <div onClick={() => setIsOpen(false)}>
+            <Brand mobile />
+          </div>
 
           <button
             type="button"
@@ -197,7 +193,7 @@ export default function Navbar() {
             onClick={() => setIsOpen(false)}
             className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
           >
-            Commencer gratuitement
+            S'inscrire
             <ArrowRight size={17} />
           </Link>
         </div>

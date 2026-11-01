@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import {
   createCourse,
   getCourses,
+  getPublishedCourses,
 } from "@/lib/courses/course.service";
 
 export async function POST(request: NextRequest) {
@@ -67,23 +68,15 @@ export async function POST(request: NextRequest) {
 }
 
 
+
 export async function GET() {
   try {
-    // 1. Vérifier l'authentification
     const user = await getCurrentUser();
 
-    if (!user) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Authentification requise.",
-        },
-        { status: 401 }
-      );
-    }
-
-    // 2. Récupérer les cours selon le rôle
-    const courses = await getCourses(user.id, user.role);
+    // Visiteur non connecté : uniquement les cours publiés.
+    const courses = user
+      ? await getCourses(user.id, user.role)
+      : await getPublishedCourses();
 
     return NextResponse.json(
       {

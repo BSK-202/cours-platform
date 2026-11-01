@@ -6,157 +6,159 @@ import {
   CheckCircle2,
   GraduationCap,
   Play,
-  Users,
+  Video,
 } from "lucide-react";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden bg-white">
+    <section className="relative isolate overflow-hidden bg-white">
       {/* Background decorations */}
-      <div className="absolute -left-32 top-20 h-56 w-56 rounded-full bg-indigo-100/60 blur-3xl sm:h-72 sm:w-72" />
-      <div className="absolute -right-32 bottom-0 h-72 w-72 rounded-full bg-violet-100/60 blur-3xl sm:h-96 sm:w-96" />
+      <div className="absolute -left-32 top-20 -z-10 h-72 w-72 rounded-full bg-indigo-100/60 blur-3xl" />
+      <div className="absolute -right-32 bottom-0 -z-10 h-80 w-80 rounded-full bg-violet-100/60 blur-3xl" />
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-12 sm:gap-14 sm:px-5 sm:py-20 lg:grid-cols-2 lg:px-8 lg:py-28">
-        {/* Left content */}
+      <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-28">
+
+        {/* Main content */}
         <div>
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 sm:mb-7 sm:px-4 sm:text-sm">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700">
             <GraduationCap size={17} />
-            Votre avenir commence ici
+            Formations en ligne avec Ikrame BASKANE
           </div>
 
-          <h1 className="max-w-2xl text-3xl leading-tight font-bold tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
-            Apprenez.
-            <span className="block text-indigo-600">Progressez.</span>
-            <span className="block">Réussissez ensemble.</span>
+          <h1 className="max-w-2xl text-4xl leading-tight font-bold tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
+            Apprenez avec méthode.
+            <span className="mt-2 block text-indigo-600">
+              Progressez avec confiance.
+            </span>
           </h1>
 
-          <p className="mt-5 max-w-xl text-sm leading-6 text-slate-600 sm:mt-7 sm:text-lg sm:leading-8">
-            SkillBridge connecte les étudiants et les professeurs dans un
-            environnement d'apprentissage simple, accessible et interactif.
-            Découvrez des cours, développez vos compétences et apprenez à votre
-            rythme.
+          <p className="mt-6 max-w-xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
+            Découvrez un espace d'apprentissage conçu pour vous accompagner
+            dans le développement de vos compétences. Suivez des formations
+            structurées, avancez à votre rythme et participez à des sessions
+            interactives en direct.
           </p>
 
-          {/* CTA buttons */}
-          <div className="mt-7 flex flex-col gap-3 min-[420px]:flex-row sm:mt-9">
+          {/* CTA */}
+          <div className="mt-8 flex flex-col gap-3 min-[420px]:flex-row">
             <Link
-              href="/register"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 hover:bg-indigo-700 sm:px-7 sm:py-4 sm:text-base"
+              href="#courses"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition-all hover:-translate-y-0.5 hover:bg-indigo-700 sm:text-base"
             >
-              Commencer gratuitement
+              Découvrir les formations
               <ArrowRight size={18} />
             </Link>
 
             <Link
-              href="#courses"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 sm:px-7 sm:py-4 sm:text-base"
+              href="/register"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 sm:text-base"
             >
-              <Play size={17} />
-              Découvrir les cours
+              Créer mon compte
             </Link>
           </div>
 
           {/* Benefits */}
-          <div className="mt-7 flex flex-wrap gap-x-5 gap-y-3 text-xs text-slate-600 sm:mt-10 sm:gap-x-6 sm:text-sm">
+          <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm text-slate-600">
             <span className="flex items-center gap-2">
-              <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
-              Accès simple
+              <CheckCircle2 size={17} className="text-emerald-600" />
+              Cours structurés
             </span>
 
             <span className="flex items-center gap-2">
-              <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
-              Apprentissage flexible
+              <CheckCircle2 size={17} className="text-emerald-600" />
+              Vidéos accessibles en ligne
             </span>
 
             <span className="flex items-center gap-2">
-              <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
+              <CheckCircle2 size={17} className="text-emerald-600" />
               Sessions Live
             </span>
           </div>
         </div>
 
-        {/* Right visual card */}
+        {/* Learning platform preview */}
         <div className="relative mx-auto w-full max-w-lg">
-          <div className="absolute -inset-3 rounded-[2rem] bg-indigo-100/70 blur-2xl sm:-inset-5" />
+          <div className="absolute -inset-4 rounded-[2rem] bg-indigo-100/70 blur-2xl" />
 
-          <div className="relative rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl shadow-slate-200/70 sm:rounded-3xl sm:p-7">
-            {/* Card header */}
+          <div className="relative rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-200/70 sm:p-7">
+
+            {/* Header */}
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-medium text-slate-500 sm:text-sm">
-                  Votre espace d'apprentissage
+                <p className="text-sm font-medium text-slate-500">
+                  Votre espace de formation
                 </p>
-                <h2 className="mt-1 text-base font-bold text-slate-900 sm:text-xl">
-                  Bienvenue sur SkillBridge
+                <h2 className="mt-1 text-xl font-bold text-slate-900">
+                  Apprenez à votre rythme
                 </h2>
               </div>
 
-              <div className="shrink-0 rounded-xl bg-indigo-50 p-2.5 text-indigo-600 sm:p-3">
-                <BookOpen size={22} />
+              <div className="rounded-xl bg-indigo-50 p-3 text-indigo-600">
+                <BookOpen size={24} />
               </div>
             </div>
 
-            {/* Feature cards */}
-            <div className="mt-5 grid grid-cols-2 gap-3 sm:mt-7 sm:gap-4">
-              <div className="rounded-xl bg-indigo-50 p-3 sm:rounded-2xl sm:p-4">
-                <BookOpen className="text-indigo-600" size={22} />
-                <p className="mt-2 text-lg font-bold text-slate-900 sm:mt-3 sm:text-2xl">
-                  Cours
-                </p>
-                <p className="mt-1 text-[11px] text-slate-500 sm:text-xs">
-                  Explorez les formations
-                </p>
-              </div>
-
-              <div className="rounded-xl bg-violet-50 p-3 sm:rounded-2xl sm:p-4">
-                <Users className="text-violet-600" size={22} />
-                <p className="mt-2 text-lg font-bold text-slate-900 sm:mt-3 sm:text-2xl">
-                  Communauté
-                </p>
-                <p className="mt-1 text-[11px] text-slate-500 sm:text-xs">
-                  Apprenez ensemble
-                </p>
-              </div>
-            </div>
-
-            {/* Interactive learning block */}
-            <div className="mt-4 rounded-xl border border-slate-100 p-4 sm:mt-5 sm:rounded-2xl sm:p-5">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-semibold text-slate-900 sm:text-base">
-                  Apprentissage interactif
+            {/* Course preview */}
+            <div className="mt-7 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-700 p-5 text-white">
+              <div className="flex items-center justify-between">
+                <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium">
+                  Votre formation
                 </span>
-
-                <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700 sm:px-3 sm:text-xs">
-                  En ligne
-                </span>
+                <Play size={20} />
               </div>
 
-              <div className="mt-4 flex items-center gap-3 sm:mt-5">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 sm:h-12 sm:w-12">
-                  <GraduationCap size={23} />
-                </div>
+              <h3 className="mt-6 text-xl font-bold">
+                Apprendre et développer ses compétences
+              </h3>
 
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 sm:text-base">
-                    Professeurs et étudiants
-                  </p>
-                  <p className="text-xs leading-5 text-slate-500 sm:text-sm">
-                    Un espace pour apprendre et enseigner
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom information */}
-            <div className="mt-4 flex items-center gap-3 rounded-xl bg-slate-50 p-3 sm:mt-5 sm:p-4">
-              <CheckCircle2
-                className="shrink-0 text-emerald-600"
-                size={19}
-              />
-
-              <p className="text-xs leading-5 text-slate-600 sm:text-sm">
-                Accédez à vos contenus depuis vos appareils.
+              <p className="mt-2 text-sm leading-6 text-indigo-100">
+                Des contenus pédagogiques organisés pour faciliter votre
+                progression.
               </p>
+            </div>
+
+            {/* Features */}
+            <div className="mt-5 grid grid-cols-2 gap-4">
+              <div className="rounded-2xl bg-indigo-50 p-4">
+                <BookOpen size={23} className="text-indigo-600" />
+                <p className="mt-3 font-bold text-slate-900">
+                  Leçons
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  Des contenus organisés par cours
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-violet-50 p-4">
+                <Video size={23} className="text-violet-600" />
+                <p className="mt-3 font-bold text-slate-900">
+                  Sessions Live
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  Des rendez-vous en direct
+                </p>
+              </div>
+            </div>
+
+            {/* Instructor identity */}
+            <div className="mt-5 flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-100 font-bold text-indigo-700">
+                IB
+              </div>
+
+              <div>
+                <p className="text-sm font-bold text-slate-900">
+                  Ikrame BASKANE
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Votre formatrice
+                </p>
+              </div>
+
+              <CheckCircle2
+                size={20}
+                className="ml-auto shrink-0 text-emerald-600"
+              />
             </div>
           </div>
         </div>
