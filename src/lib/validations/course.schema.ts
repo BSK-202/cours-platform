@@ -24,7 +24,6 @@ export const createCourseSchema = z.object({
 
 export type CreateCourseInput = z.infer<typeof createCourseSchema>;
 
-
 export const updateCourseSchema = z
   .object({
     title: z
@@ -50,5 +49,10 @@ export const updateCourseSchema = z
       .optional()
       .or(z.literal("")),
   })
+  .strict()                                   // ← rejette professorId et tout champ inconnu
+  .refine(
+    (data) => Object.keys(data).length > 0,
+    { message: "Au moins un champ doit être fourni." }
+  );
   
 export type UpdateCourseInput = z.infer<typeof updateCourseSchema>;
